@@ -44,7 +44,7 @@
         "method": "GET",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "https://api.openweathermap.org/data/2.5/weather?q=mumbai,in&appid=3673bd07c0fb32e040ebc1aae7db804c",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
