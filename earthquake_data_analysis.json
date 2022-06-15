@@ -1,0 +1,273 @@
+[
+    {
+        "id": "2519f8485896b9fb",
+        "type": "tab",
+        "label": "Earthquake Analysis",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8510a750871dfa77",
+        "type": "inject",
+        "z": "2519f8485896b9fb",
+        "name": "Trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 90,
+        "y": 280,
+        "wires": [
+            [
+                "deb3e6f27fabd51a"
+            ]
+        ]
+    },
+    {
+        "id": "deb3e6f27fabd51a",
+        "type": "http request",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 210,
+        "y": 360,
+        "wires": [
+            [
+                "35ba128f278b6c7d"
+            ]
+        ]
+    },
+    {
+        "id": "35ba128f278b6c7d",
+        "type": "csv",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": false,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 330,
+        "y": 440,
+        "wires": [
+            [
+                "f5c4726a98a745c7",
+                "13b14a86b1d10305"
+            ]
+        ]
+    },
+    {
+        "id": "08d6dd8ff05aea12",
+        "type": "ui_table",
+        "z": "2519f8485896b9fb",
+        "group": "9e84dd761d593a1a",
+        "name": "RMS Table",
+        "order": 0,
+        "width": "6",
+        "height": "41",
+        "columns": [
+            {
+                "field": "place",
+                "title": "Place",
+                "width": "140",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "rmsvalue",
+                "title": "RMS",
+                "width": "80",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "fit",
+                "title": "Fit",
+                "width": "80",
+                "align": "left",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            }
+        ],
+        "outputs": 0,
+        "cts": false,
+        "x": 690,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "f5c4726a98a745c7",
+        "type": "function",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "func": "tabledata = flow.get(\"saveddata\") || [];\n\nfunction fit(rms_value){\n    if (msg.payload.rms < 1){\n    return \"Better Fit\";\n    }\n    else{\n    return \"Worse Fit\";\n    }\n}\ntabledata.unshift({\n    \"place\" : msg.payload.place,\n    \"rmsvalue\" : msg.payload.rms,\n    \"fit\" : fit(msg.payload.rms)\n    });\n    \nmsg.payload = tabledata;\n\nflow.set(\"saveddata\", tabledata);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 440,
+        "wires": [
+            [
+                "08d6dd8ff05aea12"
+            ]
+        ]
+    },
+    {
+        "id": "fb6910b9eb813dc3",
+        "type": "debug",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "13b14a86b1d10305",
+        "type": "switch",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "property": "payload.rms",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "gt",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 470,
+        "y": 300,
+        "wires": [
+            [
+                "fc623118c8a60133"
+            ],
+            [
+                "809894ff28c58032"
+            ]
+        ]
+    },
+    {
+        "id": "fc623118c8a60133",
+        "type": "change",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Better Fit",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 240,
+        "wires": [
+            [
+                "fb6910b9eb813dc3"
+            ]
+        ]
+    },
+    {
+        "id": "809894ff28c58032",
+        "type": "change",
+        "z": "2519f8485896b9fb",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Worse Fit",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 380,
+        "wires": [
+            [
+                "fb6910b9eb813dc3"
+            ]
+        ]
+    },
+    {
+        "id": "9e84dd761d593a1a",
+        "type": "ui_group",
+        "name": "RMS Data",
+        "tab": "522db4be7387618d",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "522db4be7387618d",
+        "type": "ui_tab",
+        "name": "Earthquake data analysis",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
